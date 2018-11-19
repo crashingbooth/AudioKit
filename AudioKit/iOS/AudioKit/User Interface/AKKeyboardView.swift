@@ -196,15 +196,21 @@ import AudioKit
             topKeyPaths[index].fill()
         }
     }
-    
+
     // MARK: - Programmatic Key Pushes
 
+    /// Programmatically trigger key press without calling delegate
     open func programmaticNoteOn(_ note: MIDINoteNumber) {
         programmaticOnKeys.insert(note)
         onKeys.insert(note)
         setNeedsDisplay()
     }
-    
+
+    /// Programatically remove key press without calling delegate
+    ///
+    /// Note: you can programmatically 'release' a note that has been pressed
+    /// manually, but in such a case, the delegate.noteOff() will not be called
+    /// when the finger is removed
     open func programmaticNoteOff(_ note: MIDINoteNumber) {
         programmaticOnKeys.remove(note)
         onKeys.remove(note)
