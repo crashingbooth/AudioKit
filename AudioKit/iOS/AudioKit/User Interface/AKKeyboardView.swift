@@ -46,6 +46,7 @@ import AudioKit
     var oneOctaveSize = CGSize.zero
     var xOffset: CGFloat = 1
     var onKeys = Set<MIDINoteNumber>()
+    var programmaticOnKeys = Set<MIDINoteNumber>()
 
     /// Allows multiple notes to play concurrently
     @objc open var polyphonicMode = false {
@@ -195,6 +196,20 @@ import AudioKit
             topKeyPaths[index].fill()
         }
     }
+    
+    // MARK: - Programmatic Key Pushes
+
+    open func programmaticNoteOn(_ note: MIDINoteNumber) {
+        programmaticOnKeys.insert(note)
+        onKeys.insert(note)
+        setNeedsDisplay()
+    }
+    
+    open func programmaticNoteOff(_ note: MIDINoteNumber) {
+        programmaticOnKeys.remove(note)
+        onKeys.remove(note)
+        setNeedsDisplay()
+    }
 
     // MARK: - Touch Handling
 
@@ -300,6 +315,7 @@ import AudioKit
             return
         }
         onKeys.remove(note)
+        programmaticOnKeys.remove(note)
         delegate?.noteOff(note: note)
         if ❗️polyphonicMode {
             // in mono mode, replace with note from highest remaining touch, if it exists
@@ -317,7 +333,9 @@ import AudioKit
         let disjunct = onKeys.subtracting(notes)
         if disjunct.isNotEmpty {
             for note in disjunct {
-                pressRemoved(note)
+                if ❗️programmaticOnKeys.contains(note) {
+                    pressRemoved(note)
+                }
             }
         }
     }
